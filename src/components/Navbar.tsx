@@ -12,10 +12,10 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
     <nav className="flex flex-col sm:flex-row sm:items-center justify-between px-4 sm:px-8 py-3.5 bg-white border-b border-slate-200 shrink-0 gap-3">
       <div className="flex items-center space-x-2.5">
         <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-base shadow-sm">
-          法
+          🚦
         </div>
         <span className="text-lg sm:text-xl font-semibold tracking-tight text-slate-900">
-          违法处罚标准查询系统
+          交通违法处罚标准查询系统
         </span>
         <span className="hidden md:inline-block bg-slate-100 text-slate-500 text-xs px-2 py-0.5 rounded font-mono">
           手机 & PC 通用

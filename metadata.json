@@ -1,5 +1,5 @@
 {
-  "name": "违法代码与处罚标准查询",
+  "name": "交通违法代码与处罚标准查询",
   "description": "适配手机与PC端的交通违法代码及处罚依据快速查询系统",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
