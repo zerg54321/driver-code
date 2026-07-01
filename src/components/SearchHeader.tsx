@@ -13,7 +13,7 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
   setFilters,
   totalCount,
 }) => {
-  const hotKeywords = ['1302', '饮酒后', '未悬挂号牌', '超速', '逆向行驶', '安全带', '无证驾驶'];
+  const hotKeywords = ['1043', '饮酒后', '未悬挂号牌', '超速', '逆向行驶', '安全带', '无证驾驶'];
 
   const handleKeywordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilters((prev) => ({ ...prev, keyword: e.target.value }));
@@ -40,7 +40,7 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
               搜索违法行为或代码
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              支持输入具体行为（如：超速、改装、酒驾）或标准4位代码（如：1302）快速精准查询
+              支持输入具体行为（如：超速、改装、酒驾）或标准4位代码（如：1043）快速精准查询
             </p>
           </div>
           <div className="text-xs text-slate-400 font-mono mt-2 md:mt-0 flex items-center">
@@ -59,7 +59,7 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
             value={filters.keyword}
             onChange={handleKeywordChange}
             className="block w-full pl-12 pr-24 sm:pr-32 py-3.5 sm:py-4 bg-slate-100 border border-transparent rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none text-base sm:text-lg text-slate-800 placeholder:text-slate-400 shadow-inner"
-            placeholder="输入关键词（如：超速、无证驾驶）或代码（如：1302）..."
+            placeholder="输入关键词（如：超速、无证驾驶）或代码（如：1043）..."
           />
           {filters.keyword && (
             <button

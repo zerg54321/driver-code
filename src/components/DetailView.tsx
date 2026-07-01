@@ -1,14 +1,15 @@
 import React from 'react';
 import { ViolationItem } from '../types';
-import { matchLawArticles } from '../data/lawsData';
+import { matchLawArticles, MatchedLaw, formatLawReference } from '../data/lawsData';
 import { ShieldAlert, BookOpen, Gavel, ArrowLeft, ExternalLink, HelpCircle } from 'lucide-react';
 
 interface DetailViewProps {
   item: ViolationItem | null;
   onCloseMobile?: () => void;
+  onJumpToLaw?: (db: 'law' | 'reg' | 'bj', artNum: number) => void;
 }
 
-export const DetailView: React.FC<DetailViewProps> = ({ item, onCloseMobile }) => {
+export const DetailView: React.FC<DetailViewProps> = ({ item, onCloseMobile, onJumpToLaw }) => {
   if (!item) {
     return (
       <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col items-center justify-center p-8 text-center text-slate-400 hidden lg:flex">
@@ -108,8 +109,8 @@ export const DetailView: React.FC<DetailViewProps> = ({ item, onCloseMobile }) =
           <h4 className="flex items-center text-sm sm:text-base font-bold text-slate-900 mb-3 pb-2 border-b border-slate-100">
             <BookOpen className="w-4 h-4 mr-2 text-blue-600 shrink-0" />
             违法行为法定依据
-            <span className="ml-auto text-xs font-normal text-slate-400 font-mono">
-              {item.behaviorLaw || '道交法相关规定'}
+            <span className="ml-auto text-xs font-normal text-slate-400 max-w-[200px] sm:max-w-xs truncate text-right font-sans" title={formatLawReference(item.behaviorLaw)}>
+              {formatLawReference(item.behaviorLaw)}
             </span>
           </h4>
 
@@ -117,10 +118,20 @@ export const DetailView: React.FC<DetailViewProps> = ({ item, onCloseMobile }) =
             <div className="space-y-4">
               {behaviorArticles.map((art, idx) => (
                 <div key={idx} className="bg-slate-50 p-4 rounded-xl border border-slate-100 text-sm leading-relaxed text-slate-700">
-                  <p className="font-bold text-slate-900 mb-1.5 flex items-center text-xs text-blue-700">
-                    <Gavel className="w-3 h-3 mr-1" />
-                    {art.title}
-                  </p>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <p className="font-bold text-slate-900 flex items-center text-xs text-blue-700">
+                      <Gavel className="w-3 h-3 mr-1" />
+                      {art.title}
+                    </p>
+                    {onJumpToLaw && (
+                      <button
+                        onClick={() => onJumpToLaw(art.db, art.artNum)}
+                        className="text-[10px] text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-0.5 cursor-pointer hover:underline"
+                      >
+                        阅读法条全文 <ExternalLink className="w-2.5 h-2.5" />
+                      </button>
+                    )}
+                  </div>
                   <div className="pl-2 border-l-2 border-blue-400 italic text-slate-800 font-serif">
                     “{art.content}”
                   </div>
@@ -130,7 +141,7 @@ export const DetailView: React.FC<DetailViewProps> = ({ item, onCloseMobile }) =
           ) : (
             <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 text-sm text-slate-600 leading-relaxed">
               <p className="font-semibold text-slate-800 mb-1">法定行为依据指引：</p>
-              <p>该行为依据为 <strong className="text-blue-600">{item.behaviorLaw || '道路交通安全法律法规通行规定'}</strong>。根据全国通行准则，驾驶人及参与者在道路上应当按规范安全通行。</p>
+              <p>该行为依据为 <strong className="text-blue-600">{formatLawReference(item.behaviorLaw)}</strong>。根据全国通行准则，驾驶人及参与者在道路上应当按规范安全通行。</p>
             </div>
           )}
         </section>
@@ -140,8 +151,8 @@ export const DetailView: React.FC<DetailViewProps> = ({ item, onCloseMobile }) =
           <h4 className="flex items-center text-sm sm:text-base font-bold text-slate-900 mb-3 pb-2 border-b border-slate-100">
             <ShieldAlert className="w-4 h-4 mr-2 text-red-600 shrink-0" />
             处罚及扣分法律依据
-            <span className="ml-auto text-xs font-normal text-slate-400 font-mono">
-              {item.punishLaw || '处罚法定标准'}
+            <span className="ml-auto text-xs font-normal text-slate-400 max-w-[200px] sm:max-w-xs truncate text-right font-sans" title={formatLawReference(item.punishLaw)}>
+              {formatLawReference(item.punishLaw)}
             </span>
           </h4>
 
@@ -149,10 +160,20 @@ export const DetailView: React.FC<DetailViewProps> = ({ item, onCloseMobile }) =
             <div className="space-y-4">
               {punishArticles.map((art, idx) => (
                 <div key={idx} className="bg-red-50/40 p-4 rounded-xl border border-red-100/80 text-sm leading-relaxed text-slate-700">
-                  <p className="font-bold text-red-900 mb-1.5 flex items-center text-xs">
-                    <Gavel className="w-3 h-3 mr-1 text-red-600" />
-                    {art.title}
-                  </p>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <p className="font-bold text-red-900 flex items-center text-xs">
+                      <Gavel className="w-3 h-3 mr-1 text-red-600" />
+                      {art.title}
+                    </p>
+                    {onJumpToLaw && (
+                      <button
+                        onClick={() => onJumpToLaw(art.db, art.artNum)}
+                        className="text-[10px] text-red-600 hover:text-red-800 font-semibold flex items-center gap-0.5 cursor-pointer hover:underline"
+                      >
+                        阅读法条全文 <ExternalLink className="w-2.5 h-2.5" />
+                      </button>
+                    )}
+                  </div>
                   <div className="pl-2 border-l-2 border-red-400 italic text-slate-800 font-serif">
                     “{art.content}”
                   </div>

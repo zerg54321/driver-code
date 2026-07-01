@@ -10,6 +10,7 @@ import { ResultList } from './components/ResultList';
 import { DetailView } from './components/DetailView';
 import { Footer } from './components/Footer';
 import { MobileDetailModal } from './components/MobileDetailModal';
+import { LawStudy } from './components/LawStudy';
 import { getViolationsList } from './data/lawsData';
 import { ViolationItem, FilterOptions } from './types';
 
@@ -26,10 +27,31 @@ export default function App() {
     category: '',
   });
 
-  // 默认在PC端选中热门条目1302（无证驾驶）或第一条
+  // 默认在PC端选中热门条目1043（变更车道影响通行）或第一条
   const [selectedItem, setSelectedItem] = useState<ViolationItem | null>(() => {
-    return allViolations.find((v) => v.code === '1302') || allViolations[0] || null;
+    return allViolations.find((v) => v.code === '1043') || allViolations[0] || null;
   });
+
+  const [jumpLawId, setJumpLawId] = useState<string | undefined>(undefined);
+  const [jumpArticleNum, setJumpArticleNum] = useState<number | undefined>(undefined);
+
+  const handleJumpToLaw = (db: 'law' | 'reg' | 'bj', artNum: number) => {
+    const dbMap: Record<string, string> = {
+      law: 'road_law',
+      reg: 'road_law_rules',
+      bj: 'bj_road_rules'
+    };
+    
+    setJumpLawId(dbMap[db]);
+    setJumpArticleNum(artNum);
+    setActiveTab('法律法规学习');
+    setSelectedItem(null); // Close mobile modal
+  };
+
+  const handleClearJump = () => {
+    setJumpLawId(undefined);
+    setJumpArticleNum(undefined);
+  };
 
   // 当Tab切换时清空分类细化
   const handleTabChange = (tab: string) => {
@@ -40,7 +62,7 @@ export default function App() {
   const filteredList = useMemo(() => {
     return allViolations.filter((item) => {
       // 1. 分类 Tab 匹配
-      if (activeTab !== '全部查询') {
+      if (activeTab !== '全部查询' && activeTab !== '法律法规学习') {
         if (item.category !== activeTab) return false;
       }
 
@@ -79,7 +101,6 @@ export default function App() {
     });
   }, [allViolations, activeTab, filters]);
 
-  // 当过滤列表变化，且选中的条目已不在新列表里时，如果是PC大屏则默认选新列表第一项
   const handleSelectItem = (item: ViolationItem) => {
     setSelectedItem(item);
   };
@@ -89,27 +110,37 @@ export default function App() {
       {/* 顶部导航条 */}
       <Navbar activeTab={activeTab} setActiveTab={handleTabChange} />
 
-      {/* 搜索与快捷筛选头 */}
-      <SearchHeader
-        filters={filters}
-        setFilters={setFilters}
-        totalCount={allViolations.length}
-      />
-
-      {/* 主体查询内容区：左右分栏布局 */}
-      <main className="flex-1 flex overflow-hidden p-3 sm:p-6 gap-4 sm:gap-6 bg-[#F8FAFC]">
-        {/* 左侧查询结果列表 */}
-        <ResultList
-          items={filteredList}
-          selectedItem={selectedItem}
-          onSelect={handleSelectItem}
+      {activeTab === '法律法规学习' ? (
+        <LawStudy
+          initialLawId={jumpLawId}
+          initialArticleNum={jumpArticleNum}
+          onClearJump={handleClearJump}
         />
+      ) : (
+        <>
+          {/* 搜索与快捷筛选头 */}
+          <SearchHeader
+            filters={filters}
+            setFilters={setFilters}
+            totalCount={allViolations.length}
+          />
 
-        {/* 右侧展开详情区（仅在PC大屏显示） */}
-        <div className="hidden lg:flex flex-1 overflow-hidden h-full shrink">
-          <DetailView item={selectedItem} />
-        </div>
-      </main>
+          {/* 主体查询内容区：左右分栏布局 */}
+          <main className="flex-1 flex overflow-hidden p-3 sm:p-6 gap-4 sm:gap-6 bg-[#F8FAFC]">
+            {/* 左侧查询结果列表 */}
+            <ResultList
+              items={filteredList}
+              selectedItem={selectedItem}
+              onSelect={handleSelectItem}
+            />
+
+            {/* 右侧展开详情区（仅在PC大屏显示） */}
+            <div className="hidden lg:flex flex-1 overflow-hidden h-full shrink">
+              <DetailView item={selectedItem} onJumpToLaw={handleJumpToLaw} />
+            </div>
+          </main>
+        </>
+      )}
 
       {/* 底部版权与免责声明 */}
       <Footer />
@@ -118,6 +149,7 @@ export default function App() {
       <MobileDetailModal
         item={selectedItem}
         onClose={() => setSelectedItem(null)}
+        onJumpToLaw={handleJumpToLaw}
       />
     </div>
   );

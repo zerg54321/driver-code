@@ -6,7 +6,7 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
-  const tabs = ['全部查询', '机动车通行', '非机动车', '高速及快速路', '行人和乘车人'];
+  const tabs = ['全部查询', '机动车通行', '非机动车', '高速及快速路', '行人和乘车人', '法律法规学习'];
 
   return (
     <nav className="flex flex-col sm:flex-row sm:items-center justify-between px-4 sm:px-8 py-3.5 bg-white border-b border-slate-200 shrink-0 gap-3">
@@ -15,7 +15,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
           🚦
         </div>
         <span className="text-lg sm:text-xl font-semibold tracking-tight text-slate-900">
-          交通违法处罚标准查询系统
+          北京交通违法处罚标准查询系统
         </span>
         <span className="hidden md:inline-block bg-slate-100 text-slate-500 text-xs px-2 py-0.5 rounded font-mono">
           手机 & PC 通用

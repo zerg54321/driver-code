@@ -1,6 +1,7 @@
 import React from 'react';
 import { ViolationItem } from '../types';
 import { ChevronRight, AlertCircle, FileSearch } from 'lucide-react';
+import { formatLawReference } from '../data/lawsData';
 
 interface ResultListProps {
   items: ViolationItem[];
@@ -19,7 +20,7 @@ export const ResultList: React.FC<ResultListProps> = ({
         <FileSearch className="w-12 h-12 mb-3 text-slate-300" />
         <p className="text-base font-semibold text-slate-600 mb-1">未查询到符合条件的违法记录</p>
         <p className="text-xs text-slate-400 max-w-sm">
-          请尝试缩短搜索词（如将“未取得机动车驾驶证”改为“无证”或“1302”），或清空上方严厉筛选条件
+          请尝试缩短搜索词（如将“影响正常行驶”改为“车道”或“1043”），或清空上方严厉筛选条件
         </p>
       </div>
     );
@@ -108,8 +109,10 @@ export const ResultList: React.FC<ResultListProps> = ({
               </div>
 
               <div className="mt-2.5 flex items-center justify-between text-[11px] text-slate-400">
-                <span>依据：{item.punishLaw || item.behaviorLaw || '交法相关规定'}</span>
-                <span className={`flex items-center font-medium ${isSelected ? 'text-blue-600' : 'text-slate-400 group-hover:text-blue-500'}`}>
+                <span className="truncate max-w-[180px] sm:max-w-[200px]" title={formatLawReference(item.punishLaw || item.behaviorLaw)}>
+                  依据：{formatLawReference(item.punishLaw || item.behaviorLaw)}
+                </span>
+                <span className={`flex items-center font-medium shrink-0 ${isSelected ? 'text-blue-600' : 'text-slate-400 group-hover:text-blue-500'}`}>
                   {isSelected ? '正在查看法条' : '展开具体法条'}
                   <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
                 </span>
