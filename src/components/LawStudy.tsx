@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { getLawsList } from '../data/lawsData';
-import { BookOpen, Search, Scale, ChevronRight, FileText, Bookmark, Sparkles, HelpCircle } from 'lucide-react';
+import { BookOpen, Search, Scale, ChevronRight, FileText, Bookmark, Sparkles, HelpCircle, SlidersHorizontal, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface LawStudyProps {
@@ -27,6 +27,9 @@ export const LawStudy: React.FC<LawStudyProps> = ({
 
   // Search input
   const [searchQuery, setSearchQuery] = useState<string>('');
+
+  // Mobile Drawer Toggle state
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState<boolean>(false);
 
   // Ref to the article elements for scrolling
   const articleRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
@@ -142,9 +145,9 @@ export const LawStudy: React.FC<LawStudyProps> = ({
   }, [searchQuery, searchResults, chapterArticles]);
 
   return (
-    <div className="flex-1 flex flex-col md:flex-row overflow-hidden bg-slate-50">
-      {/* 左侧控制栏 / 侧边栏 */}
-      <div className="w-full md:w-80 bg-white border-r border-slate-200 flex flex-col shrink-0 md:h-full overflow-hidden">
+    <div className="flex-1 flex flex-col md:flex-row overflow-hidden bg-slate-50 relative">
+      {/* 左侧控制栏 / 侧边栏 (仅在 PC 端显示) */}
+      <div className="hidden md:flex w-80 bg-white border-r border-slate-200 flex-col shrink-0 h-full overflow-hidden">
         {/* 三部法律选择卡片 */}
         <div className="p-4 border-b border-slate-100 shrink-0">
           <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
@@ -243,10 +246,30 @@ export const LawStudy: React.FC<LawStudyProps> = ({
         </div>
       </div>
 
+      {/* 移动端快捷筛选顶部工具栏 (仅在移动端显示) */}
+      <div className="md:hidden bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between sticky top-0 z-20 shrink-0 shadow-xs">
+        <div className="flex flex-col min-w-0">
+          <div className="flex items-center space-x-1 px-1 py-0.5 bg-slate-100 rounded text-[10px] text-slate-500 font-semibold truncate max-w-[140px] w-fit mb-1">
+            <Scale className="w-2.5 h-2.5 text-blue-500 shrink-0" />
+            <span className="truncate">{currentLaw.law_name}</span>
+          </div>
+          <div className="text-sm font-bold text-slate-800 truncate max-w-[180px]">
+            {searchQuery ? '全法检索模式' : activeChapter || '法律正文'}
+          </div>
+        </div>
+        <button
+          onClick={() => setIsMobileDrawerOpen(true)}
+          className="flex items-center space-x-1 px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold shadow-sm shadow-blue-200 active:scale-95 transition-all shrink-0 cursor-pointer"
+        >
+          <SlidersHorizontal className="w-3.5 h-3.5" />
+          <span>目录与法律</span>
+        </button>
+      </div>
+
       {/* 右侧条文阅读区 */}
       <div className="flex-1 overflow-y-auto p-4 sm:p-8 flex flex-col h-full bg-[#FAFAFA]">
-        {/* 面包屑 / 当前标题 */}
-        <div className="mb-6 shrink-0">
+        {/* 面包屑 / 当前标题 (PC端显示) */}
+        <div className="hidden md:block mb-6 shrink-0">
           <div className="flex items-center space-x-2 text-xs text-slate-400 mb-1.5">
             <BookOpen className="w-3.5 h-3.5 text-blue-500" />
             <span>法律法规库</span>
@@ -268,6 +291,21 @@ export const LawStudy: React.FC<LawStudyProps> = ({
             )}
           </h2>
         </div>
+
+        {/* 移动端快速清除搜索标签 (仅在移动端且有搜索查询时显示) */}
+        {searchQuery && (
+          <div className="md:hidden mb-4 bg-blue-50 border border-blue-100 rounded-xl p-3 flex items-center justify-between shrink-0">
+            <div className="text-xs text-blue-800">
+              当前展示：<strong>全法搜索 "{searchQuery}"</strong> (共 {searchResults.length} 条)
+            </div>
+            <button
+              onClick={() => setSearchQuery('')}
+              className="text-xs font-bold text-blue-600 hover:underline cursor-pointer bg-blue-100 px-2 py-1 rounded"
+            >
+              清除搜索
+            </button>
+          </div>
+        )}
 
         {/* 条文列表 */}
         <div className="flex-1 space-y-6 max-w-3xl">
@@ -363,6 +401,151 @@ export const LawStudy: React.FC<LawStudyProps> = ({
           </AnimatePresence>
         </div>
       </div>
+
+      {/* 移动端底部抽屉与遮罩层 */}
+      <AnimatePresence>
+        {isMobileDrawerOpen && (
+          <>
+            {/* 半透明遮罩 */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileDrawerOpen(false)}
+              className="fixed inset-0 bg-slate-900/60 z-40 md:hidden backdrop-blur-xs"
+            />
+            {/* 抽屉面板 */}
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 24, stiffness: 180 }}
+              className="fixed bottom-0 inset-x-0 bg-white rounded-t-2xl z-50 max-h-[80vh] flex flex-col overflow-hidden md:hidden shadow-2xl border-t border-slate-200"
+            >
+              {/* 抽屉头部 */}
+              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-150 shrink-0 bg-slate-50">
+                <div className="flex items-center space-x-2">
+                  <SlidersHorizontal className="w-4 h-4 text-blue-600" />
+                  <span className="font-bold text-slate-800 text-sm sm:text-base">选择法规与章节</span>
+                </div>
+                <button
+                  onClick={() => setIsMobileDrawerOpen(false)}
+                  className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* 抽屉内容滚动区 */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-5 pb-8">
+                {/* 1. 法规选择 */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                    1. 选择法律法规
+                  </label>
+                  <div className="space-y-1.5">
+                    {laws.map((law) => {
+                      const isSelected = law.law_id === selectedLawId;
+                      return (
+                        <button
+                          key={law.law_id}
+                          onClick={() => {
+                            setSelectedLawId(law.law_id);
+                            setSearchQuery('');
+                          }}
+                          className={`w-full text-left px-3.5 py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 flex items-start space-x-3 cursor-pointer border ${
+                            isSelected
+                              ? 'bg-blue-50/80 text-blue-700 border-blue-200 shadow-xs ring-2 ring-blue-100/50'
+                              : 'hover:bg-slate-50 text-slate-600 hover:text-slate-900 border-slate-150 bg-white'
+                          }`}
+                        >
+                          <Scale className={`w-4 h-4 shrink-0 mt-0.5 ${isSelected ? 'text-blue-600' : 'text-slate-400'}`} />
+                          <div className="leading-tight">
+                            <div className="font-bold">{law.law_name}</div>
+                            <div className="text-[10px] text-slate-400 mt-1">版本: {law.version}</div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* 2. 检索法条 */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                    2. 全法检索匹配
+                  </label>
+                  <div className="relative">
+                    <Search className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
+                    <input
+                      type="text"
+                      placeholder="搜索法条 (如 '36' 或 '超速')..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:border-blue-500 focus:ring-1 focus:ring-blue-100 placeholder-slate-400"
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery('')}
+                        className="absolute right-3 top-2.5 text-sm font-bold text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* 3. 章节目录 */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                    3. 浏览章节正文
+                  </label>
+                  {!searchQuery ? (
+                    <div className="space-y-1.5">
+                      {currentLaw.catalogs.map((cat) => {
+                        const isActive = cat.chapter === activeChapter;
+                        return (
+                          <button
+                            key={cat.chapter}
+                            onClick={() => {
+                              setActiveChapter(cat.chapter);
+                              setIsMobileDrawerOpen(false); // 选中章节后自动关闭抽屉
+                            }}
+                            className={`w-full text-left px-3.5 py-3 rounded-xl text-xs font-medium transition-all flex items-center justify-between cursor-pointer border ${
+                              isActive
+                                ? 'bg-slate-100 text-slate-900 font-bold border-slate-200'
+                                : 'hover:bg-slate-50 text-slate-500 hover:text-slate-800 border-transparent'
+                            }`}
+                          >
+                            <div className="flex items-center space-x-2.5 truncate">
+                              <FileText className={`w-4 h-4 shrink-0 ${isActive ? 'text-blue-500' : 'text-slate-400'}`} />
+                              <span className="truncate">{cat.chapter}</span>
+                            </div>
+                            <ChevronRight className={`w-3.5 h-3.5 transition-transform ${isActive ? 'rotate-90 text-slate-600' : 'text-slate-400'}`} />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="p-4 text-center bg-slate-50 border border-slate-150 rounded-xl text-slate-500 text-xs">
+                      正在展示全法搜索结果
+                      <div className="mt-1.5 font-bold text-blue-600">已检索到 {searchResults.length} 条匹配条文</div>
+                      <button
+                        onClick={() => {
+                          setSearchQuery('');
+                        }}
+                        className="mt-3.5 text-xs text-blue-500 underline font-semibold block mx-auto hover:text-blue-600 cursor-pointer"
+                      >
+                        返回浏览目录大纲
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

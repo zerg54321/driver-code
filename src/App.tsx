@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { SearchHeader } from './components/SearchHeader';
 import { ResultList } from './components/ResultList';
@@ -27,10 +27,30 @@ export default function App() {
     category: '',
   });
 
-  // 默认在PC端选中热门条目1043（变更车道影响通行）或第一条
-  const [selectedItem, setSelectedItem] = useState<ViolationItem | null>(() => {
-    return allViolations.find((v) => v.code === '1043') || allViolations[0] || null;
-  });
+  // 初始设为 null，避免移动端加载时直接弹出弹窗
+  const [selectedItem, setSelectedItem] = useState<ViolationItem | null>(null);
+
+  // 在 PC 大屏幕上（宽度 >= 1024px）如果未选择任何项，则默认选中热门条目 1043
+  useEffect(() => {
+    const selectDefaultOnDesktop = () => {
+      if (window.innerWidth >= 1024 && !selectedItem) {
+        const defaultItem = allViolations.find((v) => v.code === '1043') || allViolations[0] || null;
+        setSelectedItem(defaultItem);
+      }
+    };
+
+    selectDefaultOnDesktop();
+
+    const handleResize = () => {
+      if (window.innerWidth >= 1024 && !selectedItem) {
+        const defaultItem = allViolations.find((v) => v.code === '1043') || allViolations[0] || null;
+        setSelectedItem(defaultItem);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [allViolations, selectedItem]);
 
   const [jumpLawId, setJumpLawId] = useState<string | undefined>(undefined);
   const [jumpArticleNum, setJumpArticleNum] = useState<number | undefined>(undefined);
